@@ -1,0 +1,13 @@
+# dsh-gfm-alerts bundle patch
+#
+# 这个文件是包的 `dsh.bundle.patch` 层：通过 DSH CLI 安装本插件时 —
+#
+#   dsh plugin --profile <name> add dsh-gfm-alerts
+#   # 或从 git 仓库：
+#   dsh plugin --profile <name> add github:NEVSTOP-LAB/dsh-gfm-alerts
+#
+# — CLI 把本 bundle 追加到 profile 组合层，这个补丁插入插件行。行的模块名就是包名，
+# 由 profile 的 node_modules 解析。
+- insert:
+    - id: dsh-gfm-alerts
+      name: 'dsh-gfm-alerts'

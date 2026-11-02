@@ -1,0 +1,61 @@
+{
+  "name": "dsh-gfm-alerts",
+  "version": "0.1.0",
+  "description": "GitHub-flavored Markdown alerts for DeepSeek Harness: render > [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING] and > [!CAUTION] blockquotes as GitHub's alert boxes in replies. DSH 的 GitHub 提示块插件。",
+  "icon": "icon.svg",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "markdown",
+    "github",
+    "alert",
+    "callout"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NEVSTOP-LAB/dsh-gfm-alerts.git"
+  },
+  "homepage": "https://github.com/NEVSTOP-LAB/dsh-gfm-alerts#readme",
+  "bugs": {
+    "url": "https://github.com/NEVSTOP-LAB/dsh-gfm-alerts/issues"
+  },
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "lib/client.js",
+    "icon.svg",
+    "locale/*.json",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "doc/",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.0-rc.1"
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check lib/client.js && node --check scripts/check.mjs && node --check scripts/release-notes.mjs && node scripts/check.mjs",
+    "pack": "node scripts/pack.mjs"
+  }
+}
