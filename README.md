@@ -1,6 +1,15 @@
-# dsh-gfm-alerts
+> [!IMPORTANT]
+> 推荐在 AGENTS.md 或 copilot-instructions.md (或其他AI参考规范文档) 中添加以下提示。
+> 
+> - **Markdown 中倾向于使用 GitHub Markdown Callouts（`> [!NOTE]`、`> [!WARNING]` 等）来强调信息，而不是单纯的加粗或斜体，或使用强烈的语气词语。**
+> 
+> DSH 的回复中，将会倾向于使用 GitHub Markdown Callouts，配合本插件，显示效果更加清楚。
 
-DSH 的 GitHub 提示块插件：把回复里的 GitHub Markdown 提示块渲染成 GitHub 的提示框——圆角底、左侧色条、图标加本地化标题，浅色/深色主题跟随宿主。
+---------------
+
+**DSH 的 GitHub 提示块插件：把回复里的 GitHub Markdown 提示块渲染成 GitHub 的提示框——圆角底、左侧色条、图标加本地化标题，浅色/深色主题跟随宿主。**
+
+<img width="1163" height="637" alt="{F4FE8B35-5624-4DDD-BDB9-9220F4426186}" src="https://github.com/user-attachments/assets/ce100123-3801-42f3-ab58-dac464cf9ced" />
 
 ```markdown
 > [!NOTE]
