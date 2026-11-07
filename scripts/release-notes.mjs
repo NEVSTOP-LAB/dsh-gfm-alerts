@@ -96,7 +96,7 @@ const body = [
   `dsh plugin --profile web add github:NEVSTOP-LAB/dsh-gfm-alerts${pinned}`,
   '```',
   '',
-  '`--profile web` 是默认 profile；桌面版用 `--profile desktop`。',
+  '`--profile web` 是默认 profile。',
   '安装后**重启 DSH 并刷新页面**，提示块才会换样式。',
   '详见 [README](https://github.com/NEVSTOP-LAB/dsh-gfm-alerts#readme)。',
   '',

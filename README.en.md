@@ -60,7 +60,7 @@ dsh plugin --profile web add github:NEVSTOP-LAB/dsh-gfm-alerts
 ```
 
 > [!NOTE]
-> `--profile web` is the default profile. DSH Desktop uses `--profile desktop`; other profiles use their own name.
+> `--profile web` is the default profile; other profiles use their own name.
 
 Pin a commit to keep the installed content fixed:
 
