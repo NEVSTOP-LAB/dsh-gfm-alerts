@@ -1,7 +1,7 @@
 {
   "name": "dsh-gfm-alerts",
-  "version": "0.1.0",
-  "description": "GitHub-flavored Markdown alerts for DeepSeek Harness: render > [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING] and > [!CAUTION] blockquotes as GitHub's alert boxes in replies. DSH 的 GitHub 提示块插件。",
+  "version": "0.2.0",
+  "description": "GitHub-flavored Markdown alerts for DeepSeek Harness: render > [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING] and > [!CAUTION] blockquotes as GitHub's alert boxes in replies, and ask the model to prefer them. DSH 的 GitHub 提示块插件。",
   "icon": "icon.svg",
   "keywords": [
     "dsh",

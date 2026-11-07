@@ -1,6 +1,9 @@
 # dsh-gfm-alerts
 
-GitHub-flavored Markdown alerts for DSH: replies that use GitHub's alert syntax are rendered the way GitHub renders them — a rounded box with a left color bar, an icon and a localized title, following the host's light and dark themes.
+GitHub-flavored Markdown alerts for DSH, in two halves:
+
+- replies that use GitHub's alert syntax are rendered the way GitHub renders them — a rounded box with a left color bar, an icon and a localized title, following the host's light and dark themes;
+- a prompt section asks the model to prefer those alerts when emphasising information in a reply.
 
 ```markdown
 > [!NOTE]
@@ -17,6 +20,7 @@ GitHub-flavored Markdown alerts for DSH: replies that use GitHub's alert syntax 
 - Theme-aware: colors come from `--dsw-alias-*` theme tokens, so switching light/dark needs no restart
 - Works while a reply is streaming; when the host re-renders and writes the literal marker back, it is stripped again immediately
 - Display only: the Session record, the event stream and the copied Markdown keep the original text
+- Prompt injection: the Host half registers a prompt section that asks the model to prefer alerts (see [Prompt injection](#prompt-injection))
 
 | Syntax | Rendering |
 | --- | --- |
@@ -25,6 +29,25 @@ GitHub-flavored Markdown alerts for DSH: replies that use GitHub's alert syntax 
 | `> [!IMPORTANT]` | purple "Important" box |
 | `> [!WARNING]` | amber "Warning" box |
 | `> [!CAUTION]` | red "Caution" box |
+
+## Prompt injection
+
+The Host half adds one system-prompt section. Its default text is Chinese:
+
+> 回复中更倾向于使用 GitHub Markdown Callouts（> [!NOTE]、> [!WARNING] 等）来强调信息，而不是单纯的加粗或斜体，或使用强烈的语气词语。
+
+It changes how the model formats a reply, nothing else: no Session event is written, no message is produced.
+
+The row's `config` in `cordis.patch.yml` tunes it; every field is optional:
+
+| Field | Default | Effect |
+| --- | --- | --- |
+| `enabled` | `true` | `false` turns the injection off |
+| `text` | the paragraph above | replaces the injected text; an empty string injects nothing |
+| `order` | `10150` | sort order of the section in the system prompt — larger is later (built-in sections occupy 9000–10200) |
+
+> [!NOTE]
+> The injection is a preference, not enforcement: the model may still answer without alerts. The plugin never rewrites a reply body or turns bold text into an alert.
 
 ## Install
 
@@ -48,7 +71,7 @@ dsh plugin --profile web add github:NEVSTOP-LAB/dsh-gfm-alerts#<commit-sha>
 A tarball from [Releases](https://github.com/NEVSTOP-LAB/dsh-gfm-alerts/releases) works too:
 
 ```sh
-dsh plugin --profile web add ./dsh-gfm-alerts-0.1.0.tgz
+dsh plugin --profile web add ./dsh-gfm-alerts-0.2.0.tgz
 ```
 
 Confirm the plugin entry in the composition layer:
@@ -70,13 +93,17 @@ dsh plugin --profile web remove dsh-gfm-alerts
 - **Blockquote form only**: `> [!NOTE]` is an alert; a bare `[!NOTE]` line stays ordinary text, which is also GitHub's rule.
 - **Depends on the rendered DOM**: the host renders Markdown as `blockquote > p`, and the plugin reads the literal marker from that first paragraph. If the host changes that structure, alerts degrade to plain quotes rather than failing.
 - **The Markdown source is untouched**: exported Session logs and copied text keep the original markers; only the display changes.
-- **Web rendering path only**: DSH Desktop's conversation view renders the same Web UI, so it is covered; headless / ACP surfaces have no such renderer.
+- **Alert boxes render on the Web UI only**: DSH Desktop's conversation view renders the same Web UI, so it is covered; headless / ACP surfaces have no such renderer. The prompt injection is a Host-side contribution and is not limited by this.
+- **The prompt injection is a preference**: the model may ignore it, and it needs the host's `systemPrompt` service.
 
 ## Implementation
 
-DSH `0.2.1-rc.5` ships a built-in mdast renderer with no registrable block-level extension point and no "assistant body" slot. The plugin therefore decorates the rendered result: it recognizes `[!TYPE]` at the start of a blockquote's first paragraph, sets `data-dsh-gfm-alert*` attributes, draws the title and icon with pseudo-elements from an injected stylesheet, and removes the literal marker from that paragraph. No React node is inserted or moved.
+The plugin has two halves:
 
-See [doc/design.md](./doc/design.md) for the DOM contract and risk boundaries, and [CONTRIBUTING.md](./CONTRIBUTING.md) for development and release steps.
+- **Host (`index.js`)**: registers one prompt section with `ctx.systemPrompt.section()`; it imports no host package and writes no Session event.
+- **Client (`lib/client.js`)**: DSH `0.2.1-rc.5` ships a built-in mdast renderer with no registrable block-level extension point and no "assistant body" slot. The plugin therefore decorates the rendered result: it recognizes `[!TYPE]` at the start of a blockquote's first paragraph, sets `data-dsh-gfm-alert*` attributes, draws the title and icon with pseudo-elements from an injected stylesheet, and removes the literal marker from that paragraph. No React node is inserted or moved.
+
+See [doc/design.md](./doc/design.md) for the DOM contract, the injection order and risk boundaries, and [CONTRIBUTING.md](./CONTRIBUTING.md) for development and release steps.
 
 ## License
 
