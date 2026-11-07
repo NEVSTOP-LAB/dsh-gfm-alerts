@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "GitHub Alerts",
-    "description": "Render GitHub Markdown alerts ([!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]) as GitHub-style boxes in replies."
+    "description": "Render GitHub Markdown alerts ([!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]) as GitHub-style boxes in replies, and ask the model to prefer them over bold or italic emphasis."
   }
 }

@@ -7,6 +7,33 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-07
+
+### 新增
+
+- **系统提示注入**：Host 半边用 `ctx.systemPrompt.section()` 注册一段排版偏好，让模型在
+  回复里优先用 GitHub 提示块（`> [!NOTE]`、`> [!WARNING]` 等）强调信息，而不是单纯的
+  加粗、斜体或强烈语气。注入段落的 `order` 是 `10150`，落在宿主 persona 结尾（10200）
+  之前。
+- **可配置**：`cordis.patch.yml` 行的 `config` 支持 `enabled`（关闭注入）、`text`
+  （自定义文本，空串等于不注入）、`order`（提示词里的排序值）。
+- **插件页描述**：中英双语描述同步提到提示注入。
+
+### 实现
+
+原来空的 Host 半边现在只做注入：不 import 宿主包、不写 Session 事件、不改回复正文，
+随插件行卸载自动移除。渲染仍在 Client 半边，两半互不依赖——Client 由 `dsh.client`
+独立加载，Host 缺席不影响提示框渲染。落点取舍、顺序取值与边界见
+[doc/design.md](./doc/design.md) §9。升级后需要重启 DSH 才生效。
+
+### 验证
+
+- `npm run check`：39 条断言全绿，其中 9 条是新加的 Host 注入断言——用 fake
+  `systemPrompt` 服务加载真实 `index.js`，覆盖默认注入、`enabled: false`、空白
+  `text`、自定义 `text` / `order`、非法 `order` 回落。
+- 反向验证：把 `DEFAULT_TEXT` 改成不含 `[!NOTE]` / `[!WARNING]` 的文本 ⇒
+  1 条 `FAIL injected text asks for GitHub callouts`；改回后 39 条全绿。
+
 ## [0.1.0] - 2026-11-02
 
 ### 新增

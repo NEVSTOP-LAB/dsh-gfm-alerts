@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "GitHub 提示块",
-    "description": "把回复里的 GitHub Markdown 提示块（[!NOTE]、[!TIP]、[!IMPORTANT]、[!WARNING]、[!CAUTION]）渲染成 GitHub 风格的提示框。"
+    "description": "把回复里的 GitHub Markdown 提示块（[!NOTE]、[!TIP]、[!IMPORTANT]、[!WARNING]、[!CAUTION]）渲染成 GitHub 风格的提示框，并提示模型优先使用提示块而不是加粗或斜体。"
   }
 }

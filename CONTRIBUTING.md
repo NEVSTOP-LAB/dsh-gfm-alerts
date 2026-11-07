@@ -27,15 +27,15 @@ dsh-gfm-alerts/
 ├── icon.svg              # 插件页/插件市场卡片图标（manifest 的 icon）
 ├── locale/en.json        # 插件显示名与描述（en）
 ├── locale/zh.json        # 插件显示名与描述（zh）
-├── index.js              # Host 半边（空实现：本插件没有 Host 侧能力）
+├── index.js              # Host 半边（系统提示注入）
 ├── lib/client.js         # Client 半边（window.__ModuleLoader__ bundle：识别标记 + 样式表）
 └── scripts/
-    ├── check.mjs         # 离线契约检查（manifest + fake DOM 上的真实 bundle）
+    ├── check.mjs         # 离线契约检查（manifest + fake DOM 上的真实 bundle + fake systemPrompt 上的真实 Host 半边）
     ├── release-notes.mjs # 由 CHANGELOG 组装 Release 正文（零依赖）
     └── pack.mjs          # 跨平台打包（npm pack → dist/）
 ```
 
-Host 与 Client 分两半：Host（`index.js`）只让组合层出现插件行；全部行为在 Client（`lib/client.js`），因为要改的是浏览器里的渲染结果。
+Host 与 Client 分两半，互不依赖：Host（`index.js`）用 `ctx.systemPrompt.section()` 注入排版偏好，不写会话事件；渲染行为全部在 Client（`lib/client.js`），因为要改的是浏览器里的渲染结果。Client 由 `dsh.client` 独立加载，所以 Host 半边缺席时渲染照常。
 
 ## 2. 本地开发与检查
 
@@ -68,18 +68,21 @@ node scripts/check.mjs
 7. 流式重渲染：把标记写回文本节点后，`characterData` 记录触发重新剥离；
 8. 语言切换：`locale/change` 后所有已装饰提示块的标题换成新语言；
 9. 样式表：五种类型的规则都在、用到 `mask-image` 与 data URI、**只出现 `--dsw-alias-*` 主题 token、没有字面色值**；
-10. 清理：disposer 移除样式表并断连 observer。
+10. 清理：disposer 移除样式表并断连 observer；
+11. Host 半边：插件对象与 `inject: ['systemPrompt']`；默认配置恰好注册一个 prompt section、注入文本含提示块写法；`enabled: false` 与空白 `text` 不注册；自定义 `text` / `order` 被采用，非法 `order` 回落到默认值。
 
 ### 2.2 证明它能失败
 
-一个永远绿的检查等于没有检查。两条反向验证（已实测，2026-11-02）：
+一个永远绿的检查等于没有检查。三条反向验证（已实测）：
 
 - 把 `lib/client.js` 里 `MARKER` 的 `NOTE` 改成 `NOTEE` ⇒ 5 条 `FAIL`，其中
   `FAIL NOTE alert is recognized and labelled: type attribute missing`；
 - 把样式表里 note 的 `var(--dsw-alias-brand-primary)` 改成 `#0969da` ⇒
-  `FAIL the stylesheet only uses theme tokens for colors: a literal hex color is present`。
+  `FAIL the stylesheet only uses theme tokens for colors: a literal hex color is present`；
+- 把 `index.js` 的 `DEFAULT_TEXT` 改成不含 `[!NOTE]` / `[!WARNING]` 的文本 ⇒
+  `FAIL injected text asks for GitHub callouts: 缺少：…`（2026-11-02、2026-11-07）。
 
-改完立刻改回，再跑一次 `npm run check` 确认 30 条全绿。
+改完立刻改回，再跑一次 `npm run check` 确认全绿。
 
 ## 3. 版本要求与兼容性
 
@@ -90,6 +93,7 @@ node scripts/check.mjs
   - `window.__ModuleLoader__.load({ id, factory })` 与 `factory()` 返回 `{ apply, inject }`；
   - Client 服务 `locale`：`register(namespace, { en, zh })` 与 `bind(namespace)`；
   - 事件 `locale/change`；
+  - Host 服务 `systemPrompt.section({ name, order, text })`：注册一个 prompt section，返回 disposer；`order` 必须是有限数，宿主内置段落占用 9000–10200；
   - Markdown 渲染器输出的 `blockquote > p` 结构与字面标记的位置（见 `doc/design.md` §2）；
   - 主题 token 名：`--dsw-alias-brand-primary`、`--dsw-alias-state-{success,warn,error}-primary`、`--dsw-alias-bg-layer-1`、`--dsw-alias-border-l1`、`--dsw-alias-label-primary`。
 
@@ -108,7 +112,8 @@ dsh plugin --profile <test-profile> add ./dist/dsh-gfm-alerts-<version>.tgz
 - 五种类型各自是圆角框，左侧色条与标题颜色对应；标题跟随界面语言；
 - 切浅色/深色主题，提示框颜色跟着变；
 - 框内正文正常，没有残留的 `[!NOTE]` 字面；
-- 提示块里的代码块、列表、链接仍然可用。
+- 提示块里的代码块、列表、链接仍然可用；
+- 新开一个会话，让它回答一个需要强调的问题：回复倾向用提示块强调；把行 config 的 `enabled` 改成 `false` 再重启，该偏好消失。
 
 卸载：`dsh plugin --profile <test-profile> remove dsh-gfm-alerts`（同样要重启）。
 
@@ -135,3 +140,6 @@ git push origin v<version>
 - **`color-mix()` 要有回退**：`important` 的紫色由 brand 与 error 混色得来，先写一个纯 token 的 `--dsh-gfm-alert-accent`，再用 `color-mix()` 覆盖；不支持混色的浏览器落到纯 token。
 - **标题用 `content: attr(...)` 画**：文案由 JS 按当前语言写进属性，切换语言时改属性，不重建样式表。
 - **只想改显示**：不要改宿主渲染器的输入文本、不要写会话事件——提示块的 Markdown 源必须保持原样。
+- **注入走 `systemPrompt.section()`**：不要为了「让模型看到偏好」往 `agent/pre-step` 塞 user 消息——那样会进会话记录、占一个消息位，还要自己判重；prompt section 只影响提示词。
+- **注入顺序用配置项**：默认 `order: 10150` 取自宿主的 `SECTION_ORDERS` 尾部（9000–10200），宿主调整段落时改配置而不是改代码里的魔法数。
+- **`apply` 可能不被调用**：插件行声明了 `inject: ['systemPrompt']`，宿主没有该服务时插件行等待；不要在 `apply` 之外假设注入已经生效。

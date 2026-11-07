@@ -8,6 +8,16 @@
 #
 # — CLI 把本 bundle 追加到 profile 组合层，这个补丁插入插件行。行的模块名就是包名，
 # 由 profile 的 node_modules 解析。
+#
+# `config` 是 Host 半边提示注入的开关，全部字段可选：
+#   enabled   关闭注入用 false（默认 true）
+#   text      自定义注入文本（默认见 index.js 的 DEFAULT_TEXT）；空字符串等于不注入
+#   order     注入段落的排序值，宿主 prompt section 按它从小到大拼接
+#             默认 10150：在交付文件引用（9000）、结构化输出（9900）之后，
+#             部署 persona 结尾（10200）之前
+# 这里只写出开关本身；文本与顺序留在代码默认值里，升级不需要同步两份。
 - insert:
     - id: dsh-gfm-alerts
       name: 'dsh-gfm-alerts'
+      config:
+        enabled: true

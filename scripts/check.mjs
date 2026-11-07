@@ -2,15 +2,18 @@
 /**
  * check.mjs — 离线契约检查，只依赖 Node 内置模块（仓库不装依赖，clone 下来直接跑）。
  *
- * 覆盖两类容易静默失败的东西：
+ * 覆盖三类容易静默失败的东西：
  *   1. manifest / 补丁 / locale 的形状——写错只表现为插件页卡片缺失或插件行不激活；
  *   2. Client bundle 的 DOM 变换——`lib/client.js` 只能以 `window.__ModuleLoader__`
  *      形式加载，出错只会出现在浏览器 console 里。这里用最小 fake DOM 加载真实
- *      bundle，断言标记识别、属性写入、标记剥离、本地化标题与清理行为。
+ *      bundle，断言标记识别、属性写入、标记剥离、本地化标题与清理行为；
+ *   3. Host 半边的系统提示注入——注入失败只表现为模型照旧写纯加粗，没有任何报错。
+ *      这里用 fake `systemPrompt` 服务加载真实 `index.js`，断言注入了什么。
  *
  * 证明它会失败：把 lib/client.js 里 MARKER 的 `NOTE` 改成 `NOTEE`，
  * 「NOTE 提示块被识别」应报 FAIL；把 CSS 里的 `--dsw-alias-brand-primary` 换成
- * `#0969da`，「样式只用主题 token」应报 FAIL。
+ * `#0969da`，「样式只用主题 token」应报 FAIL；把 index.js 的 `DEFAULT_TEXT`
+ * 改成不含 `[!NOTE]` 的文本，「注入文本保留提示块写法」应报 FAIL。
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -429,6 +432,78 @@ check('disposal removes the stylesheet and disconnects the observer', () => {
   context.cleanup()
   if (document.getElementById('dsh-gfm-alerts-style') !== null) throw new Error('stylesheet survived disposal')
   return observers.at(-1).connected === false
+})
+
+/* ------------------------------------------------------------------ *
+ * 5. Host half: 系统提示注入
+ * ------------------------------------------------------------------ */
+
+const host = await import(pathToFileURL(path.join(root, 'index.js')).href)
+const hostPlugin = host.default
+
+check('Host half is a Cordis plugin object', () => {
+  if (typeof hostPlugin?.apply !== 'function') throw new Error('index.js 没有导出 apply')
+  if (hostPlugin.name !== manifest.name) throw new Error(`插件名 ${hostPlugin.name} != 包名`)
+  return true
+})
+
+check('Host half declares the systemPrompt dependency', () => {
+  if (!Array.isArray(hostPlugin.inject)) throw new Error('没有声明 inject')
+  return hostPlugin.inject.includes('systemPrompt')
+})
+
+/** 用只记录 section 的 fake `systemPrompt` 服务跑一次 `apply`。 */
+function applyHost(config) {
+  const sections = []
+  hostPlugin.apply(
+    {
+      systemPrompt: {
+        section(section) {
+          sections.push(section)
+          return () => {}
+        },
+      },
+    },
+    config,
+  )
+  return sections
+}
+
+const defaultSections = applyHost(undefined)
+
+check('default config registers exactly one prompt section', () => {
+  if (defaultSections.length !== 1) throw new Error(`注册了 ${defaultSections.length} 个 section`)
+  const [section] = defaultSections
+  if (typeof section.name !== 'string' || section.name.trim() === '') throw new Error('section 没有名字')
+  return Number.isFinite(section.order)
+})
+
+check('injected text asks for GitHub callouts', () => {
+  const text = defaultSections[0]?.text ?? ''
+  const missing = ['GitHub Markdown Callouts', '[!NOTE]', '[!WARNING]', '加粗', '斜体'].filter(
+    (phrase) => !text.includes(phrase),
+  )
+  if (missing.length > 0) throw new Error(`缺少：${missing.join('、')}`)
+  return text === host.DEFAULT_TEXT
+})
+
+check('enabled: false injects nothing', () => applyHost({ enabled: false }).length === 0)
+
+check('a custom text replaces the default', () => {
+  const sections = applyHost({ text: '优先用提示块。' })
+  return sections.length === 1 && sections[0].text === '优先用提示块。'
+})
+
+check('blank text injects nothing', () => applyHost({ text: '   ' }).length === 0)
+
+check('a non-finite order falls back to the default', () => {
+  const sections = applyHost({ order: Number.NaN })
+  return sections.length === 1 && sections[0].order === defaultSections[0].order
+})
+
+check('a custom order is used', () => {
+  const sections = applyHost({ order: 42 })
+  return sections.length === 1 && sections[0].order === 42
 })
 
 /* ------------------------------------------------------------------ */
