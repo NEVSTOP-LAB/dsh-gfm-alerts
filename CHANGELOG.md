@@ -65,8 +65,8 @@ React 节点。DOM 契约与边界见 [doc/design.md](./doc/design.md)。
 - 反向验证：把 `MARKER` 的 `NOTE` 改成 `NOTEE` ⇒ 5 条 `FAIL`；把样式表里的
   `var(--dsw-alias-brand-primary)` 换成 `#0969da` ⇒ 1 条
   `FAIL the stylesheet only uses theme tokens for colors`。改回后 30 条全绿。
-- 宿主：DSH Desktop `0.2.1-rc.5`，以本地目录方式装入 `desktop` profile 后，
-  Host 插件行激活（`Config.listConfigs` 返回 `include:gfm-alerts`）、页面正常启动
+- 宿主：DSH Desktop `0.2.1-rc.5`，Host 插件行激活
+  （`Config.listConfigs` 返回 `include:gfm-alerts`）、页面正常启动
   （客户端入口未失败）。
 - 未完成：提示框的最终视觉未由维护者截图核对；替换已安装包需要重启 DSH，
   这一步留给使用者在真实界面上确认。

@@ -58,7 +58,7 @@ dsh plugin --profile web add github:NEVSTOP-LAB/dsh-gfm-alerts
 ```
 
 > [!NOTE]
-> `--profile web` 是默认 profile。DSH Desktop 用 `--profile desktop`；其他 profile 换成对应名字。
+> `--profile web` 是默认 profile；其他 profile 换成对应名字。
 
 建议锁定提交，避免后续更新改变实际内容：
 

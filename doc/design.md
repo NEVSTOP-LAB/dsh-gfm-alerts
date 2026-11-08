@@ -140,6 +140,6 @@ prompt section 按 `order` 从小到大拼接，实测宿主 `SECTION_ORDERS` �
 ## 10. 验证记录
 
 - 2026-11-02：`npm run check` 30 条全绿；两条反向验证（标记正则写错、样式表写字面色值）分别报 5 条与 1 条 `FAIL`。
-- 2026-11-02：DSH Desktop 0.2.1-rc.5，本地目录方式装入 `desktop` profile 后 Host 插件行激活、页面正常启动。
+- 2026-11-02：DSH Desktop 0.2.1-rc.5 上 Host 插件行激活、页面正常启动。
 - 2026-11-07：`npm run check` 39 条全绿（新增 9 条 Host 注入断言，用 fake `systemPrompt` 服务加载真实 `index.js`）；反向验证把 `DEFAULT_TEXT` 里的提示块写法删掉 ⇒ 1 条 `FAIL injected text asks for GitHub callouts`。宿主 `SECTION_ORDERS` 尾部的取值读自安装包（§9.2）。
 - 未完成：真实界面的提示框视觉未截图核对；注入在真实会话里的效果未核对（替换已安装包需要重启宿主）。
