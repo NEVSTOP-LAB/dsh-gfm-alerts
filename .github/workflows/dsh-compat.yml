@@ -60,10 +60,11 @@ jobs:
       fail-fast: false
       matrix:
         dsh: ${{ fromJson(needs.prepare.outputs.versions) }}
-    env:
-      DSH_HOME: ${{ runner.temp }}/dsh-home
     steps:
       - uses: actions/checkout@v4
+      # job 级 env 不能用 runner 上下文，DSH_HOME 只能在 step 里导出
+      - name: Set DSH_HOME
+        run: echo "DSH_HOME=$RUNNER_TEMP/dsh-home" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
