@@ -1,3 +1,6 @@
+> [!NOTE]
+> Compatible with DSH 0.2.x (see `engines.dsh` in `package.json`); tested against `0.2.0-rc.2`, `0.2.1-rc.5` and `0.2.2-rc.5` (each version installed into a profile on Linux CI).
+
 # dsh-gfm-alerts
 
 GitHub-flavored Markdown alerts for DSH, in two halves:
@@ -51,7 +54,7 @@ The row's `config` in `cordis.patch.yml` tunes it; every field is optional:
 
 ## Install
 
-Requires the [dsh CLI](https://github.com/deepseek-ai/deepseek-harness); the host lower bound is `0.2.0-rc.1`.
+Requires the [dsh CLI](https://github.com/deepseek-ai/deepseek-harness); the supported host range is `engines.dsh` in `package.json`.
 
 From the GitHub repository:
 
@@ -101,7 +104,7 @@ dsh plugin --profile web remove dsh-gfm-alerts
 The plugin has two halves:
 
 - **Host (`index.js`)**: registers one prompt section with `ctx.systemPrompt.section()`; it imports no host package and writes no Session event.
-- **Client (`lib/client.js`)**: DSH `0.2.1-rc.5` ships a built-in mdast renderer with no registrable block-level extension point and no "assistant body" slot. The plugin therefore decorates the rendered result: it recognizes `[!TYPE]` at the start of a blockquote's first paragraph, sets `data-dsh-gfm-alert*` attributes, draws the title and icon with pseudo-elements from an injected stylesheet, and removes the literal marker from that paragraph. No React node is inserted or moved.
+- **Client (`lib/client.js`)**: the host ships a built-in mdast renderer with no registrable block-level extension point and no "assistant body" slot. The plugin therefore decorates the rendered result: it recognizes `[!TYPE]` at the start of a blockquote's first paragraph, sets `data-dsh-gfm-alert*` attributes, draws the title and icon with pseudo-elements from an injected stylesheet, and removes the literal marker from that paragraph. No React node is inserted or moved.
 
 See [doc/design.md](./doc/design.md) for the DOM contract, the injection order and risk boundaries, and [CONTRIBUTING.md](./CONTRIBUTING.md) for development and release steps.
 
