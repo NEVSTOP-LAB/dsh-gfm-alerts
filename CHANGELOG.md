@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-27
+
+### 变更
+
+- **声明并验证 DSH 0.2.x 兼容性**：`engines.dsh` 改为 `>=0.2.0-rc.1 <0.3.0-0`；新增 `.github/workflows/dsh-compat.yml`，按 `engines.dsh` 过滤后在 Linux 上逐版本装进隔离 profile 验证；README 中英两版兼容信息收敛到顶部一处 callout。
+
 ## [0.2.0] - 2026-11-07
 
 ### 新增
