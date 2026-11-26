@@ -36,8 +36,9 @@ jobs:
             echo "engines.dsh 不覆盖任何被测 0.2.x 版本：$DSH_VERSIONS" >&2
             exit 1
           fi
-          echo "versions: $(echo $versions)"
-          echo "versions=$(echo $versions | jq -Rnc '[inputs]')" >> "$GITHUB_OUTPUT"
+          echo "versions: $versions"
+          # 未加引号的 $versions 会按空白词分割，printf 逐行还原，jq -R 才能建出多元素数组
+          echo "versions=$(printf '%s\n' $versions | jq -Rnc '[inputs]')" >> "$GITHUB_OUTPUT"
 
   checks:
     name: Checks and tests
