@@ -86,7 +86,7 @@ node scripts/check.mjs
 
 ## 3. 版本要求与兼容性
 
-- **`engines.dsh` 是唯一的宿主版本声明**（当前 `>=0.2.0-rc.1`，实测 DSH Desktop 的 `0.2.1-rc.5`）。上界不写，宿主的兼容判定只看下界。
+- **`engines.dsh` 是唯一的宿主版本声明**，范围写成 `<下界> <0.3.0-0`：下界是插件验证过的最低宿主版本，`<0.3.0-0` 排除下一个大版本及其预发布。宿主的兼容判定用 `semver.satisfies(运行时版本, 范围, { includePrerelease: true })`。
 - **不 import 任何带版本号的 `@deepseek-ai/dsh-*` 宿主包**：Client 半边的 `require` 只从浏览器模块表取（本插件一个都不需要），Host 半边不 import 库。重新引入这类依赖会在宿主的组合期被判为不兼容，插件行直接不激活。
 - 若将来必须依赖宿主共享包，**一律声明在 `peerDependencies` 并逐项标 `peerDependenciesMeta.optional: true`**，不要放进 `dependencies`：不标 `optional` 时 profile 的 `pnpm peers check` 会把这些包全报成 `missing peer`；放进 `dependencies` 会在插件自己的 `node_modules` 里装一份独立拷贝、遮蔽宿主版本。
 - 本插件依赖的宿主契约（改动前先在真实宿主里确认）：

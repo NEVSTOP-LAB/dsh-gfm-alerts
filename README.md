@@ -1,3 +1,6 @@
+> [!NOTE]
+> 兼容 DSH 0.2.x（`engines.dsh` 见 `package.json`）；实测 `0.2.0-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.5`（Linux CI 逐版本装载验证）。
+
 **DSH 的 GitHub 提示块插件：把回复里的 GitHub Markdown 提示块渲染成 GitHub 的提示框——圆角底、左侧色条、图标加本地化标题，浅色/深色主题跟随宿主。插件还会注入一条偏好，让模型在回复里优先用提示块强调信息。**
 
 > <img width="1163" height="637" alt="{F4FE8B35-5624-4DDD-BDB9-9220F4426186}" src="https://github.com/user-attachments/assets/ce100123-3801-42f3-ab58-dac464cf9ced" />
@@ -49,7 +52,7 @@ Host 半边往系统提示里加一个 prompt section，默认内容是：
 
 ## 安装
 
-需要 [dsh CLI](https://github.com/deepseek-ai/deepseek-harness)，宿主版本下界 `0.2.0-rc.1`。
+需要 [dsh CLI](https://github.com/deepseek-ai/deepseek-harness)，宿主版本范围见 `package.json` 的 `engines.dsh`。
 
 从 GitHub 仓库安装：
 
@@ -99,7 +102,7 @@ dsh plugin --profile web remove dsh-gfm-alerts
 插件分两半：
 
 - **Host（`index.js`）**：用 `ctx.systemPrompt.section()` 注册一段排版偏好；不 import 任何宿主包，也不写会话事件。
-- **Client（`lib/client.js`）**：DSH `0.2.1-rc.5` 的 Markdown 渲染器是宿主内置的 mdast 渲染器，没有可注册的块级渲染扩展点，也没有「助手正文」槽位。插件因此对渲染结果做增量装饰：识别 `blockquote` 首段开头的 `[!TYPE]`，挂 `data-dsh-gfm-alert*` 属性，由注入的样式表用伪元素画标题与图标，并去掉首段的字面标记；不插入、不移动 React 节点。
+- **Client（`lib/client.js`）**：宿主的 Markdown 渲染器是内置的 mdast 渲染器，没有可注册的块级渲染扩展点，也没有「助手正文」槽位。插件因此对渲染结果做增量装饰：识别 `blockquote` 首段开头的 `[!TYPE]`，挂 `data-dsh-gfm-alert*` 属性，由注入的样式表用伪元素画标题与图标，并去掉首段的字面标记；不插入、不移动 React 节点。
 
 细节、DOM 契约、注入顺序与风险边界见 [doc/design.md](./doc/design.md)；开发与发版流程见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
 
